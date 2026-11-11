@@ -1,0 +1,106 @@
+name: update
+
+on:
+  schedule:
+    # Both possible UTC hours for 08:00, 15:00 and 20:00 Amsterdam time (summer and winter).
+    # The guard step decides which trigger is the real one.
+    - cron: "0 6,7,13,14,18,19 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: househunt-update
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    env:
+      SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+      GEO_CONTACT_EMAIL: ${{ secrets.GEO_CONTACT_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Fetch database from the data branch
+        run: |
+          mkdir -p data
+          if git fetch origin data; then
+            git show FETCH_HEAD:househunt.db > data/househunt.db
+          fi
+
+      - name: Compile
+        run: mvn -B -q compile
+
+      - name: Guard (is this trigger an open slot?)
+        id: guard
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "force=--force" >> "$GITHUB_OUTPUT"
+          else
+            mvn -B -q exec:java -Dexec.args="guard"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.run == 'true'
+        with:
+          node-version: "22"
+
+      - name: Build the frontend
+        if: steps.guard.outputs.run == 'true'
+        working-directory: frontend
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Cache the Playwright browser
+        if: steps.guard.outputs.run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-1.48.0
+
+      - name: Install the Playwright browser
+        if: steps.guard.outputs.run == 'true'
+        run: mvn -B -q exec:java -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps chromium"
+
+      - name: Collect, filter, encrypt
+        if: steps.guard.outputs.run == 'true'
+        run: mvn -B -q exec:java -Dexec.args="run ${{ steps.guard.outputs.force }}"
+
+      - name: Save the database to the data branch
+        if: steps.guard.outputs.run == 'true'
+        run: |
+          rm -rf /tmp/databranch && mkdir /tmp/databranch && cd /tmp/databranch
+          git init -q
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch origin data; then git checkout -q -b data FETCH_HEAD; else git checkout -q --orphan data; fi
+          cp "$GITHUB_WORKSPACE/data/househunt.db" househunt.db
+          git add househunt.db
+          git commit -q -m "Update data" || true
+          git push origin data
+
+      - uses: actions/configure-pages@v5
+        if: steps.guard.outputs.run == 'true'
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.guard.outputs.run == 'true'
+        with:
+          path: site
+
+      - uses: actions/deploy-pages@v4
+        if: steps.guard.outputs.run == 'true'

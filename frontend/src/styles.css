@@ -1,0 +1,124 @@
+:root {
+  color-scheme: light dark;
+  --background: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1c2026;
+  --muted: #8b929c;
+  --border: #e1e4e8;
+  --accent: #1f6feb;
+  --warning: #b45309;
+  --error: #c62828;
+  --pill-available-bg: #dcfce7;
+  --pill-available-text: #166534;
+  --pill-under_offer-bg: #fef3c7;
+  --pill-under_offer-text: #92400e;
+  --pill-sold_conditions_pending-bg: #fee2e2;
+  --pill-sold_conditions_pending-text: #991b1b;
+  --badge-new: #1f6feb;
+  --badge-gone: #6b7280;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f1216;
+    --surface: #171b21;
+    --text: #e6e9ee;
+    --muted: #6f7782;
+    --border: #2a3039;
+    --accent: #5ea1ff;
+    --warning: #f5b454;
+    --error: #ff8a80;
+    --pill-available-bg: #12351f;
+    --pill-available-text: #86efac;
+    --pill-under_offer-bg: #3b2c0b;
+    --pill-under_offer-text: #fcd34d;
+    --pill-sold_conditions_pending-bg: #3d1515;
+    --pill-sold_conditions_pending-text: #fca5a5;
+    --badge-new: #3b82f6;
+    --badge-gone: #4b5563;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+main { max-width: 1280px; margin: 0 auto; padding: 16px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.unknown { color: var(--muted); }
+.empty { text-align: center; color: var(--muted); padding: 48px 16px; }
+
+/* Password screen */
+.password-screen { display: grid; min-height: 100vh; place-items: center; }
+.password-screen form {
+  display: grid; gap: 12px; width: min(320px, 90vw); padding: 24px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+}
+.password-screen input[type="password"] {
+  padding: 10px 12px; font-size: 16px; color: inherit; background: var(--background);
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.password-screen .remember { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+.password-screen button {
+  padding: 10px; font-size: 16px; color: #fff; background: var(--accent);
+  border: 0; border-radius: 8px; cursor: pointer;
+}
+.password-screen button:disabled { opacity: 0.5; cursor: default; }
+.password-screen .error { margin: 0; color: var(--error); }
+
+/* Status line */
+.status-line { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; color: var(--muted); font-size: 14px; }
+.status-line .warning { color: var(--warning); font-weight: 600; }
+
+/* Table */
+.home-table {
+  width: 100%; border-collapse: collapse; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+}
+.home-table th, .home-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.home-table th { font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.home-table tbody tr:last-child td { border-bottom: 0; }
+.home-table .number { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.home-table .address { font-weight: 600; }
+.home-table tr.gone { opacity: 0.5; }
+
+.badge {
+  display: inline-block; margin-left: 8px; padding: 1px 8px; font-size: 12px; font-weight: 600;
+  color: #fff; border-radius: 999px; vertical-align: middle;
+}
+.badge-new { background: var(--badge-new); }
+.badge-gone { background: var(--badge-gone); }
+
+.pill { display: inline-block; padding: 2px 10px; font-size: 13px; border-radius: 999px; white-space: nowrap; }
+.pill-available { background: var(--pill-available-bg); color: var(--pill-available-text); }
+.pill-under_offer { background: var(--pill-under_offer-bg); color: var(--pill-under_offer-text); }
+.pill-sold_conditions_pending { background: var(--pill-sold_conditions_pending-bg); color: var(--pill-sold_conditions_pending-text); }
+
+/* Mobile: every row becomes a card */
+@media (max-width: 720px) {
+  main { padding: 8px; }
+  .home-table, .home-table tbody { display: block; border: 0; background: transparent; }
+  .home-table thead { display: none; }
+  .home-table tr {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; margin-bottom: 10px; padding: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  }
+  .home-table td { padding: 0; border: 0; text-align: left; }
+  .home-table td.address { grid-column: 1; }
+  .home-table td.price { grid-column: 2; text-align: right; font-weight: 600; }
+  .home-table td.address::before, .home-table td.price::before { content: none; }
+  .home-table td:not(.address):not(.price)::before {
+    display: block; content: attr(data-label); font-size: 11px; color: var(--muted);
+  }
+  .home-table td.number { text-align: left; }
+}
