@@ -15,6 +15,8 @@ import househunt.source.SourceFetchers
 import househunt.source.createSources
 import househunt.store.Database
 import househunt.store.HomesFile
+import househunt.store.importClaudeResults
+import househunt.store.readClaudeResults
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Instant
@@ -27,9 +29,10 @@ fun main(arguments: Array<String>) {
         "guard" -> runGuardCommand()
         "run" -> runCollectionCommand(forced = "--force" in arguments)
         "publish" -> runPublishCommand()
+        "import-claude-results" -> runImportCommand(arguments.getOrNull(1))
         "probe" -> runPhaseZeroProbe(loadConfiguration(configurationPath), readEnvironmentSettings())
         else -> {
-            System.err.println("Usage: guard | run [--force] | publish | probe")
+            System.err.println("Usage: guard | run [--force] | publish | import-claude-results <file> | probe")
             exitProcess(2)
         }
     }
@@ -76,6 +79,18 @@ private fun runPublishCommand() {
         }
         publishAndReport(configuration, environment, data)
     }
+}
+
+/** Merges the Claude task's Funda/Pararius results into homes.json; needs no secrets and visits no website. */
+private fun runImportCommand(resultsFile: String?) {
+    if (resultsFile == null) {
+        System.err.println("Usage: import-claude-results <file>")
+        exitProcess(2)
+    }
+    val configuration = loadConfiguration(configurationPath)
+    val today = Instant.now().atZone(java.time.ZoneId.of(configuration.schedule.timeZone)).toLocalDate().toString()
+    val homesFile = HomesFile(Path.of(configuration.paths.homesFile))
+    println(importClaudeResults(readClaudeResults(Path.of(resultsFile)), homesFile, today))
 }
 
 private fun publishAndReport(configuration: AppConfiguration, environment: EnvironmentSettings, data: PublishedData) {
