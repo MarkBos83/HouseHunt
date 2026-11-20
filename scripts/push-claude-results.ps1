@@ -1,5 +1,5 @@
-# Run by a Windows scheduled job every 15 minutes.
-# When the Claude scheduled task has left claude-results.json in this folder, this merges it into
+# Started by watch-claude-results.ps1 as soon as the Claude scheduled task writes claude-results.json.
+# Merges it into
 # homes.json, commits and pushes to main (which makes GitHub rebuild the website), then deletes it.
 # Output is appended to data\push-claude-results.log.
 
@@ -65,6 +65,8 @@ try {
     Write-Log (Publish-Results)
     Remove-Item $resultsFile -ErrorAction Stop
 } catch {
-    Write-Log "FAILED: $_"
+    # Moved aside so the watcher does not retry it over and over; it stays there to look at.
+    Move-Item $resultsFile (Join-Path $repository "claude-results.failed.json") -Force
+    Write-Log "FAILED: $_ (results kept in claude-results.failed.json)"
     exit 1
 }

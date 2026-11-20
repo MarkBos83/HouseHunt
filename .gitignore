@@ -7,3 +7,4 @@ frontend/dist/
 .idea/
 .vscode/
 claude-results.json
+claude-results.failed.json
