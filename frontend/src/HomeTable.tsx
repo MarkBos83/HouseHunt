@@ -11,7 +11,7 @@ import {
   sortCheapestFirst,
   statusLabels,
 } from "./formatting";
-import type { Home } from "./types";
+import type { Home, SourceName } from "./types";
 
 interface HomeTableProps {
   homes: Home[];
@@ -27,6 +27,17 @@ function Value({ text }: { text: string }) {
 function StatusPill({ status }: { status: string | null }) {
   if (status === null) return <Value text="–" />;
   return <span className={`pill pill-${status.toLowerCase()}`}>{statusLabels[status] ?? status}</span>;
+}
+
+/** Every site that lists the home, highest priority first. */
+function SourceList({ sources }: { sources: SourceName[] }) {
+  return (
+    <span className="sources">
+      {sources.map((source) => (
+        <span key={source} className="source">{source}</span>
+      ))}
+    </span>
+  );
 }
 
 function HomeRow({ home, isNew }: { home: Home; isNew: boolean }) {
@@ -52,7 +63,7 @@ function HomeRow({ home, isNew }: { home: Home; isNew: boolean }) {
       <td className="number" data-label="Bike to station">
         <Value text={formatBike(home.bikeToStationMeters, home.bikeToStationMinutes)} />
       </td>
-      <td data-label="Source"><span className="source">{home.source}</span></td>
+      <td data-label="Source"><SourceList sources={home.sources} /></td>
       <td data-label="Map">
         <a href={home.googleMapsUrl} target="_blank" rel="noopener noreferrer">Google Maps</a>
       </td>

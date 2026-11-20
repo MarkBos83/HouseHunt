@@ -91,7 +91,11 @@ a:hover { text-decoration: underline; }
 .home-table .number { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .home-table .address { font-weight: 600; }
 .home-table tr.gone { opacity: 0.5; }
-.home-table .source { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted); }
+.home-table .sources { display: flex; flex-wrap: wrap; gap: 4px; }
+.home-table .source {
+  padding: 1px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted);
+  border: 1px solid var(--border); border-radius: 4px;
+}
 
 .badge {
   display: inline-block; margin-left: 8px; padding: 1px 8px; font-size: 12px; font-weight: 600;

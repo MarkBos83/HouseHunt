@@ -10,7 +10,7 @@ export type SourceName = "FUNDA" | "PARARIUS" | "HUISLIJN" | "BUURTJE";
 
 export interface Home {
   key: string;
-  source: SourceName;
+  sources: SourceName[];
   address: string;
   url: string;
   googleMapsUrl: string;

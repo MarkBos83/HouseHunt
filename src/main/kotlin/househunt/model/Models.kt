@@ -104,7 +104,8 @@ data class SourceRunResult(
 @Serializable
 data class PublishedHome(
     val key: String,
-    val source: String,
+    /** Every site that lists this home, highest priority first. */
+    val sources: List<String>,
     val address: String,
     val url: String,
     val googleMapsUrl: String,

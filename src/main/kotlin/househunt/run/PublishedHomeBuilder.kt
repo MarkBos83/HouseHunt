@@ -77,9 +77,13 @@ class PublishedHomeBuilder(
         return updated
     }
 
+    /** The merged listings are already sorted by source priority. */
+    private fun listSources(merged: MergedHome): List<String> =
+        merged.listings.map { it.source.name }.distinct()
+
     private fun toPublishedHome(stored: StoredHome, merged: MergedHome, work: BikeInfo?, station: BikeInfo?) = PublishedHome(
         key = "h${stored.id}",
-        source = merged.source.name,
+        sources = listSources(merged),
         address = merged.address,
         url = merged.url,
         googleMapsUrl = buildGoogleMapsUrl(merged),
