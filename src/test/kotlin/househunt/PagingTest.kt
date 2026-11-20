@@ -1,7 +1,6 @@
 package househunt
 
-import househunt.model.SourceName
-import househunt.source.CardLinkSource
+import househunt.source.BuurtjeSource
 import househunt.source.HttpStatusException
 import househunt.source.PageFetcher
 import kotlin.test.Test
@@ -9,10 +8,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class PagingTest {
-    private val firstPage = """<ul><li><a href="/woning/ringweg-5"><h3>Ringweg 5</h3></a><p>3812 CD Amersfoort € 299.000</p></li></ul>"""
+    private val firstPage = """<div class="pc"><a class="pc-body" href="/woning/ringweg-5"></a><span class="pc-adres">Ringweg 5</span></div>"""
     private val searchUrl = "https://example.test/zoeken"
 
-    private fun sourceWith(secondPageStatus: Int?): CardLinkSource {
+    private fun sourceWith(secondPageStatus: Int?): BuurtjeSource {
         val fetcher = object : PageFetcher {
             override fun fetchHtml(url: String): String = when {
                 "page=2" !in url -> firstPage
@@ -20,7 +19,7 @@ class PagingTest {
                 else -> throw HttpStatusException(secondPageStatus, url)
             }
         }
-        return CardLinkSource(SourceName.BUURTJE, searchUrl, Regex("/woning/"), "page", 5, fetcher, fetcher) { 0 }
+        return BuurtjeSource(searchUrl, 5, fetcher) { 0 }
     }
 
     @Test
@@ -43,7 +42,7 @@ class PagingTest {
         val fetcher = object : PageFetcher {
             override fun fetchHtml(url: String): String = throw HttpStatusException(404, url)
         }
-        val source = CardLinkSource(SourceName.BUURTJE, searchUrl, Regex("/woning/"), "page", 5, fetcher, fetcher) { 0 }
+        val source = BuurtjeSource(searchUrl, 5, fetcher) { 0 }
         assertFailsWith<HttpStatusException> { source.fetchSearchListings() }
     }
 }

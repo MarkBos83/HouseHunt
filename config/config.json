@@ -1,8 +1,6 @@
 {
-  "enabledSources": ["PARARIUS", "HUISLIJN", "BUURTJE"],
+  "enabledSources": ["HUISLIJN", "BUURTJE"],
   "searchUrls": {
-    "FUNDA": "https://www.funda.nl/zoeken/koop?selected_area=amersfoort/straat-databankweg&radius_search=2&price=0-400000&floor_area=75-&bedrooms=2-&energy_label=A%2B%2B%2B%2B%2B,A%2B%2B%2B%2B,A%2B%2B%2B,A%2B%2B,A%2B,A,B",
-    "PARARIUS": "https://www.pararius.nl/koopwoningen/amersfoort/wijk-de-hoef/0-400000/straal-3/2-slaapkamers/75m2",
     "HUISLIJN": "https://www.huislijn.nl/koopwoning/nederland/utrecht?order=relevance&c-nieuwbouw=alle&c-radius=3&c-maxPrice=400000&c-livingArea=75&c-nrRooms=2&c-municipality=Amersfoort&c-latitude=52.170694820346&c-longitude=5.395356631421",
     "BUURTJE": "https://buurtje.nl/koopwoningen/amersfoort/?prijs_max=400000&oppervlakte_min=75&beschikbaar%5B%5D=beschikbaar&beschikbaar%5B%5D=onder_optie&beschikbaar%5B%5D=onder_bod&beschikbaar%5B%5D=verkocht_voorbehoud&energielabel%5B%5D=A%2B%2B%2B%2B&energielabel%5B%5D=A%2B%2B%2B&energielabel%5B%5D=A%2B%2B&energielabel%5B%5D=A%2B&energielabel%5B%5D=A&energielabel%5B%5D=B&slaapkamers=2"
   },
@@ -28,8 +26,7 @@
     "work": { "name": "Databankweg 12K", "query": "Databankweg 12K Amersfoort" },
     "stations": [
       { "name": "Amersfoort Schothorst", "query": "Station Amersfoort Schothorst" },
-      { "name": "Amersfoort Vathorst", "query": "Station Amersfoort Vathorst" },
-      { "name": "Amersfoort Centraal", "query": "Station Amersfoort Centraal" }
+      { "name": "Amersfoort Vathorst", "query": "Station Amersfoort Vathorst" }
     ]
   },
   "requests": {
@@ -49,6 +46,7 @@
   },
   "paths": {
     "databaseFile": "data/househunt.db",
+    "homesFile": "homes.json",
     "frontendTemplate": "frontend/dist/template.html",
     "outputFile": "site/index.html",
     "fixtureDirectory": "src/test/resources/fixtures"

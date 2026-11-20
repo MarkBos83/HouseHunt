@@ -28,9 +28,8 @@ class LazyPageFetcher(provider: () -> PageFetcher) : PageFetcher {
 }
 
 /**
- * Per-source choice of plain HTTP or browser. Phase 0 showed that Pararius, Huislijn and Buurtje
- * work over plain HTTP (the headless browser even got a 403 on Pararius detail pages).
- * Funda shows a bot check to both plain HTTP and the headless browser.
+ * Huislijn and Buurtje work over plain HTTP. Funda and Pararius are not scraped here:
+ * a Claude scheduled task writes them to homes.json.
  */
 fun createSources(
     configuration: AppConfiguration,
@@ -40,7 +39,6 @@ fun createSources(
 ): List<ListingSource> = createAllSources(configuration, fetchers, currentEpochSeconds)
     .filter { !onlyEnabled || it.sourceName in configuration.enabledSources }
 
-/** Funda stays in the code but is off by default (see `enabledSources` in the config). */
 private fun createAllSources(
     configuration: AppConfiguration,
     fetchers: SourceFetchers,
@@ -51,11 +49,6 @@ private fun createAllSources(
         configuration.searchUrls[source] ?: error("No search URL configured for $source")
 
     return listOf(
-        CardLinkSource(
-            SourceName.FUNDA, searchUrl(SourceName.FUNDA), Regex("/detail/koop/"), "search_result",
-            maximumPages, fetchers.http, fetchers.http, currentEpochSeconds,
-        ),
-        ParariusSource(searchUrl(SourceName.PARARIUS), maximumPages, fetchers.http, currentEpochSeconds),
         HuislijnSource(searchUrl(SourceName.HUISLIJN), maximumPages, fetchers.http, currentEpochSeconds),
         BuurtjeSource(searchUrl(SourceName.BUURTJE), maximumPages, fetchers.http, currentEpochSeconds),
     )

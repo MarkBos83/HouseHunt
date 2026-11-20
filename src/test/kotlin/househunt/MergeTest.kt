@@ -6,6 +6,7 @@ import househunt.model.EnergyLabel
 import househunt.model.SourceName
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class MergeTest {
 
@@ -21,6 +22,20 @@ class MergeTest {
         assertEquals(4, merged.bedrooms)
         assertEquals(EnergyLabel.B, merged.energyLabel)
         assertEquals(150, merged.serviceCostsPerMonth)
+    }
+
+    @Test
+    fun `service costs only come from buurtje`() {
+        val pararius = buildListing(SourceName.PARARIUS, serviceCosts = 200)
+        val buurtje = buildListing(SourceName.BUURTJE, serviceCosts = 150)
+        assertEquals(150, mergeListings(listOf(pararius, buurtje)).serviceCostsPerMonth)
+        assertNull(mergeListings(listOf(pararius, buildListing(SourceName.HUISLIJN, serviceCosts = 90))).serviceCostsPerMonth)
+    }
+
+    @Test
+    fun `the source column shows the highest priority source`() {
+        val merged = mergeListings(listOf(buildListing(SourceName.BUURTJE), buildListing(SourceName.PARARIUS)))
+        assertEquals(SourceName.PARARIUS, merged.source)
     }
 
     @Test

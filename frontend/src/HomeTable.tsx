@@ -41,7 +41,7 @@ function HomeRow({ home, isNew }: { home: Home; isNew: boolean }) {
         {gone && <span className="badge badge-gone">Gone</span>}
       </td>
       <td className="number price" data-label="Price"><Value text={formatPrice(home.price)} /></td>
-      <td className="number" data-label="Service costs/month"><Value text={formatServiceCosts(home.serviceCostsPerMonth)} /></td>
+      <td className="number" data-label="Service cost/month"><Value text={formatServiceCosts(home.serviceCostsPerMonth)} /></td>
       <td className="number" data-label="Area"><Value text={formatArea(home.areaSquareMeters)} /></td>
       <td className="number" data-label="Bedrooms"><Value text={formatBedrooms(home.bedrooms)} /></td>
       <td data-label="Energy label"><Value text={formatEnergyLabel(home.energyLabel)} /></td>
@@ -51,6 +51,10 @@ function HomeRow({ home, isNew }: { home: Home; isNew: boolean }) {
       </td>
       <td className="number" data-label="Bike to station">
         <Value text={formatBike(home.bikeToStationMeters, home.bikeToStationMinutes)} />
+      </td>
+      <td data-label="Source"><span className="source">{home.source}</span></td>
+      <td data-label="Map">
+        <a href={home.googleMapsUrl} target="_blank" rel="noopener noreferrer">Google Maps</a>
       </td>
     </tr>
   );
@@ -64,13 +68,15 @@ export function HomeTable({ homes, nowEpochSeconds, newBadgeHours }: HomeTablePr
         <tr>
           <th>Address</th>
           <th className="number">Price</th>
-          <th className="number">Service costs/month</th>
+          <th className="number">Service cost/month</th>
           <th className="number">Area</th>
           <th className="number">Bedrooms</th>
           <th>Energy label</th>
           <th>Status</th>
           <th className="number">Bike to Databankweg</th>
           <th className="number">Bike to station</th>
+          <th>Source</th>
+          <th>Map</th>
         </tr>
       </thead>
       <tbody>

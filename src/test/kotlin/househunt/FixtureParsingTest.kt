@@ -6,7 +6,6 @@ import househunt.model.SourceName
 import househunt.source.BuurtjeSource
 import househunt.source.HuislijnSource
 import househunt.source.PageFetcher
-import househunt.source.ParariusSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -66,23 +65,6 @@ class FixtureParsingTest {
         assertEquals("https://buurtje.nl/tussenwoning/gerrit-van-stellingwerfstraat-34-amersfoort/", first.url)
         assertEquals(52.1567, first.coordinates!!.latitude)
         assertTrue(listings.all { (it.price ?: 0) <= 400_000 })
-    }
-
-    @Test
-    fun `pararius search page and detail page`() {
-        val source = ParariusSource("https://www.pararius.nl/koopwoningen/amersfoort/0-400000/75m2/2-slaapkamers", 1, unusedFetcher) { 0 }
-        val listings = source.parseSearchPage(fixture("pararius-http-search.html"), "https://www.pararius.nl/koopwoningen/amersfoort/0-400000/75m2/2-slaapkamers", 7)
-        assertEquals(6, listings.size)
-
-        val first = listings.first()
-        assertEquals("Zangvogelweg", first.street)
-        assertEquals(281, first.houseNumber)
-        assertEquals(340_000, first.price)
-
-        val detailed = source.parseDetailPage(fixture("pararius-http-detail.html"), first)
-        assertEquals(4, detailed.bedrooms)
-        assertEquals(EnergyLabel.B, detailed.energyLabel)
-        assertEquals(52.166368793, detailed.coordinates!!.latitude)
     }
 
     @Test

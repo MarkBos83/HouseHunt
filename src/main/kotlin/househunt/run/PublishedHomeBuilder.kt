@@ -3,7 +3,7 @@ package househunt.run
 import househunt.filter.passesBasicFilters
 import househunt.filter.passesBikeFilter
 import househunt.geo.BikeInfoService
-import househunt.lifecycle.isHomePresent
+import househunt.geo.buildGoogleMapsUrl
 import househunt.lifecycle.isWithinGoneRetention
 import househunt.lifecycle.updateGoneSince
 import househunt.merge.groupListingsByKeys
@@ -11,9 +11,10 @@ import househunt.merge.mergeListings
 import househunt.model.BikeInfo
 import househunt.model.MergedHome
 import househunt.model.PublishedHome
-import househunt.model.StoredListing
 import househunt.store.Database
+import househunt.store.HomeEntry
 import househunt.store.StoredHome
+import househunt.store.toRawListing
 import kotlin.math.roundToInt
 
 private data class HomeCandidate(
@@ -21,29 +22,24 @@ private data class HomeCandidate(
     val present: Boolean,
 )
 
-/** Turns everything in the database into the list of homes the website shows. */
+/** Turns every entry in homes.json into the list of homes the website shows. */
 class PublishedHomeBuilder(
     private val database: Database,
     private val bikeInfoService: BikeInfoService,
     private val configuration: AppConfiguration,
 ) {
 
-    fun build(nowEpochSeconds: Long, baselineRun: Boolean): List<PublishedHome> {
-        val latestSuccess = database.findLatestSuccessPerSource()
-        val stored = database.findAllListings()
-        return findCandidates(stored, latestSuccess)
+    fun build(entries: List<HomeEntry>, nowEpochSeconds: Long, baselineRun: Boolean): List<PublishedHome> =
+        findCandidates(entries)
             .mapNotNull { candidate -> buildPublishedHome(candidate, nowEpochSeconds, baselineRun) }
             .sortedBy { it.price ?: Int.MAX_VALUE }
-    }
 
-    private fun findCandidates(
-        stored: List<StoredListing>,
-        latestSuccess: Map<househunt.model.SourceName, Long>,
-    ): List<HomeCandidate> {
-        val storedByIdentity = stored.associateBy { it.listing.source to it.listing.url }
-        return groupListingsByKeys(stored.map { it.listing }).map { group ->
-            val storedGroup = group.mapNotNull { storedByIdentity[it.source to it.url] }
-            val presentListings = storedGroup.filter { isHomePresent(listOf(it), latestSuccess) }.map { it.listing }
+    /** One candidate per home; a home is present while at least one source still lists it. */
+    private fun findCandidates(entries: List<HomeEntry>): List<HomeCandidate> {
+        val listedUrls = entries.filterNot { it.noLongerListed }.map { it.url }.toSet()
+        val listings = entries.mapNotNull { toRawListing(it) }
+        return groupListingsByKeys(listings).map { group ->
+            val presentListings = group.filter { it.url in listedUrls }
             HomeCandidate(mergeListings(presentListings.ifEmpty { group }), presentListings.isNotEmpty())
         }
     }
@@ -83,8 +79,10 @@ class PublishedHomeBuilder(
 
     private fun toPublishedHome(stored: StoredHome, merged: MergedHome, work: BikeInfo?, station: BikeInfo?) = PublishedHome(
         key = "h${stored.id}",
+        source = merged.source.name,
         address = merged.address,
         url = merged.url,
+        googleMapsUrl = buildGoogleMapsUrl(merged),
         price = merged.price,
         serviceCostsPerMonth = merged.serviceCostsPerMonth,
         areaSquareMeters = merged.areaSquareMeters,

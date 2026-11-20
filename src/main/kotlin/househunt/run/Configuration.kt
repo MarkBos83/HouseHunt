@@ -55,6 +55,8 @@ data class PathConfiguration(
     val frontendTemplate: String,
     val outputFile: String,
     val fixtureDirectory: String,
+    /** Shared with the Claude scheduled task, which writes the Funda and Pararius entries. */
+    val homesFile: String = "homes.json",
 )
 
 /** Results outside this box are treated as wrong matches (PDOK once put a station near Rotterdam). */

@@ -74,7 +74,9 @@ data class HomeKeys(val postcodeKey: String?, val streetKey: String?) {
 /** One home after listings from several sources were combined. */
 data class MergedHome(
     val keys: HomeKeys,
+    val source: SourceName,
     val address: String,
+    val postcode: String?,
     val url: String,
     val city: String?,
     val price: Int?,
@@ -102,8 +104,10 @@ data class SourceRunResult(
 @Serializable
 data class PublishedHome(
     val key: String,
+    val source: String,
     val address: String,
     val url: String,
+    val googleMapsUrl: String,
     val price: Int?,
     val serviceCostsPerMonth: Int?,
     val areaSquareMeters: Int?,

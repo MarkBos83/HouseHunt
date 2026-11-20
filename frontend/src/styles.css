@@ -91,6 +91,7 @@ a:hover { text-decoration: underline; }
 .home-table .number { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .home-table .address { font-weight: 600; }
 .home-table tr.gone { opacity: 0.5; }
+.home-table .source { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted); }
 
 .badge {
   display: inline-block; margin-left: 8px; padding: 1px 8px; font-size: 12px; font-weight: 600;

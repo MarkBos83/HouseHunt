@@ -4,6 +4,7 @@ const secondsPerHour = 3600;
 const staleDataHours = 12;
 const missingValue = "–";
 const unknownValue = "?";
+const unknownServiceCosts = "Unknown";
 
 export const statusLabels: Record<string, string> = {
   AVAILABLE: "Available",
@@ -15,8 +16,9 @@ export function formatPrice(price: number | null): string {
   return price === null ? missingValue : `€ ${price.toLocaleString("nl-NL")}`;
 }
 
+/** Service costs only come from Buurtje; anything else is "Unknown". */
 export function formatServiceCosts(amount: number | null): string {
-  return amount === null ? missingValue : `€ ${amount.toLocaleString("nl-NL")}`;
+  return amount === null ? unknownServiceCosts : `€ ${amount.toLocaleString("nl-NL")}`;
 }
 
 export function formatArea(area: number | null): string {
@@ -38,7 +40,7 @@ export function formatBike(meters: number | null, minutes: number | null): strin
 }
 
 export function isUnknownText(text: string): boolean {
-  return text === missingValue || text === unknownValue;
+  return text === missingValue || text === unknownValue || text === unknownServiceCosts;
 }
 
 export function isGone(home: Home): boolean {

@@ -6,6 +6,7 @@ import househunt.geo.JsonHttpClient
 import househunt.geo.NominatimGeocoder
 import househunt.geo.OsrmBikeRouter
 import househunt.geo.PdokGeocoder
+import househunt.model.PublishedData
 import househunt.publish.publishSite
 import househunt.source.BrowserPageFetcher
 import househunt.source.HttpPageFetcher
@@ -13,6 +14,7 @@ import househunt.source.RequestPacer
 import househunt.source.SourceFetchers
 import househunt.source.createSources
 import househunt.store.Database
+import househunt.store.HomesFile
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Instant
@@ -24,9 +26,10 @@ fun main(arguments: Array<String>) {
     when (arguments.firstOrNull()) {
         "guard" -> runGuardCommand()
         "run" -> runCollectionCommand(forced = "--force" in arguments)
+        "publish" -> runPublishCommand()
         "probe" -> runPhaseZeroProbe(loadConfiguration(configurationPath), readEnvironmentSettings())
         else -> {
-            System.err.println("Usage: guard | run [--force] | probe")
+            System.err.println("Usage: guard | run [--force] | publish | probe")
             exitProcess(2)
         }
     }
@@ -59,9 +62,25 @@ private fun runCollectionCommand(forced: Boolean) {
         val data = createFetchers(configuration).use { fetchers ->
             buildPipeline(configuration, environment, database, fetchers).execute(slot, now.epochSecond)
         }
-        publishSite(data, environment.sitePassword, Path.of(configuration.paths.frontendTemplate), Path.of(configuration.paths.outputFile))
-        println("Published ${data.homes.size} homes; sources: ${data.sources.joinToString { "${it.name}=${if (it.ok) "ok" else "FAILED (${it.error})"}" }}")
+        publishAndReport(configuration, environment, data)
     }
+}
+
+/** Rebuilds the site from homes.json only; Huislijn and Buurtje are not visited. */
+private fun runPublishCommand() {
+    val configuration = loadConfiguration(configurationPath)
+    val environment = readEnvironmentSettings()
+    Database(Path.of(configuration.paths.databaseFile)).use { database ->
+        val data = createFetchers(configuration).use { fetchers ->
+            buildPipeline(configuration, environment, database, fetchers).publishFromHomesFile(Instant.now().epochSecond)
+        }
+        publishAndReport(configuration, environment, data)
+    }
+}
+
+private fun publishAndReport(configuration: AppConfiguration, environment: EnvironmentSettings, data: PublishedData) {
+    publishSite(data, environment.sitePassword, Path.of(configuration.paths.frontendTemplate), Path.of(configuration.paths.outputFile))
+    println("Published ${data.homes.size} homes; sources: ${data.sources.joinToString { "${it.name}=${if (it.ok) "ok" else "FAILED (${it.error})"}" }}")
 }
 
 private fun findSlotOrExit(configuration: AppConfiguration, database: Database, now: Instant): RunSlot {
@@ -90,7 +109,8 @@ fun buildPipeline(
 ): RunPipeline {
     val sources = createSources(configuration, fetchers) { Instant.now().epochSecond }
     val bikeInfoService = createBikeInfoService(configuration, environment, database)
-    return RunPipeline(configuration, database, sources, PublishedHomeBuilder(database, bikeInfoService, configuration))
+    val homesFile = HomesFile(Path.of(configuration.paths.homesFile))
+    return RunPipeline(configuration, database, sources, homesFile, PublishedHomeBuilder(database, bikeInfoService, configuration))
 }
 
 fun createBikeInfoService(

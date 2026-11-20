@@ -3,8 +3,10 @@ package househunt.merge
 import househunt.model.HomeKeys
 import househunt.model.MergedHome
 import househunt.model.RawListing
+import househunt.model.SourceName
 import househunt.normalize.buildHomeKeys
 import househunt.normalize.formatAddress
+import househunt.normalize.normalizePostcode
 
 /** Groups listings that share a postcode key or a street key. */
 fun groupListingsByKeys(listings: List<RawListing>): List<List<RawListing>> {
@@ -28,7 +30,9 @@ fun mergeListings(group: List<RawListing>): MergedHome {
     val price = firstValue(byPriority) { it.price }
     return MergedHome(
         keys = mergeKeys(byPriority),
+        source = primary.source,
         address = formatAddress(primary),
+        postcode = firstValue(byPriority) { normalizePostcode(it.postcode) },
         url = primary.url,
         city = firstValue(byPriority) { it.city },
         price = price,
@@ -37,7 +41,7 @@ fun mergeListings(group: List<RawListing>): MergedHome {
         bedrooms = firstValue(byPriority) { it.bedrooms },
         energyLabel = firstValue(byPriority) { it.energyLabel },
         status = firstValue(byPriority) { it.status },
-        serviceCostsPerMonth = firstValue(byPriority) { it.serviceCostsPerMonth },
+        serviceCostsPerMonth = findBuurtjeServiceCosts(byPriority),
         coordinates = firstValue(byPriority) { it.coordinates },
         listings = byPriority,
     )
@@ -53,6 +57,12 @@ private fun mergeKeys(byPriority: List<RawListing>): HomeKeys {
         streetKey = allKeys.firstNotNullOfOrNull { it.streetKey },
     )
 }
+
+/** Service costs are only trusted from Buurtje; without a Buurtje listing they stay unknown. */
+private fun findBuurtjeServiceCosts(listings: List<RawListing>): Int? =
+    listings.firstNotNullOfOrNull { listing ->
+        listing.serviceCostsPerMonth.takeIf { listing.source == SourceName.BUURTJE }
+    }
 
 /** The highest-priority source with a value wins; lower sources only fill gaps. */
 private fun <T : Any> firstValue(byPriority: List<RawListing>, field: (RawListing) -> T?): T? =

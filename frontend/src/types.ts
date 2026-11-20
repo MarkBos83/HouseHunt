@@ -6,10 +6,14 @@ export interface EncryptedPayload {
   data: string;
 }
 
+export type SourceName = "FUNDA" | "PARARIUS" | "HUISLIJN" | "BUURTJE";
+
 export interface Home {
   key: string;
+  source: SourceName;
   address: string;
   url: string;
+  googleMapsUrl: string;
   price: number | null;
   serviceCostsPerMonth: number | null;
   areaSquareMeters: number | null;
