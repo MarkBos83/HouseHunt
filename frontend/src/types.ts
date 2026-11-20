@@ -8,9 +8,14 @@ export interface EncryptedPayload {
 
 export type SourceName = "FUNDA" | "PARARIUS" | "HUISLIJN" | "BUURTJE";
 
+export interface HomeSource {
+  name: SourceName;
+  url: string;
+}
+
 export interface Home {
   key: string;
-  sources: SourceName[];
+  sources: HomeSource[];
   address: string;
   url: string;
   googleMapsUrl: string;

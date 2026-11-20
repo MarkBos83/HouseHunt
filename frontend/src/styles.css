@@ -93,9 +93,10 @@ a:hover { text-decoration: underline; }
 .home-table tr.gone { opacity: 0.5; }
 .home-table .sources { display: flex; flex-wrap: wrap; gap: 4px; }
 .home-table .source {
-  padding: 1px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted);
+  padding: 1px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: var(--accent);
   border: 1px solid var(--border); border-radius: 4px;
 }
+.home-table .source:hover { text-decoration: none; border-color: var(--accent); }
 
 .badge {
   display: inline-block; margin-left: 8px; padding: 1px 8px; font-size: 12px; font-weight: 600;

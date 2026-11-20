@@ -105,7 +105,7 @@ data class SourceRunResult(
 data class PublishedHome(
     val key: String,
     /** Every site that lists this home, highest priority first. */
-    val sources: List<String>,
+    val sources: List<PublishedSource>,
     val address: String,
     val url: String,
     val googleMapsUrl: String,
@@ -123,6 +123,10 @@ data class PublishedHome(
     val baseline: Boolean,
     val goneSinceEpochSeconds: Long?,
 )
+
+/** One site that lists a home, with the link to the listing on that site. */
+@Serializable
+data class PublishedSource(val name: String, val url: String)
 
 @Serializable
 data class PublishedSourceStatus(

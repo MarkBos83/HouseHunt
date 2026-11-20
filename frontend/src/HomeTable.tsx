@@ -11,7 +11,7 @@ import {
   sortCheapestFirst,
   statusLabels,
 } from "./formatting";
-import type { Home, SourceName } from "./types";
+import type { Home, HomeSource } from "./types";
 
 interface HomeTableProps {
   homes: Home[];
@@ -29,12 +29,14 @@ function StatusPill({ status }: { status: string | null }) {
   return <span className={`pill pill-${status.toLowerCase()}`}>{statusLabels[status] ?? status}</span>;
 }
 
-/** Every site that lists the home, highest priority first. */
-function SourceList({ sources }: { sources: SourceName[] }) {
+/** Every site that lists the home, highest priority first, each linking to its listing. */
+function SourceList({ sources }: { sources: HomeSource[] }) {
   return (
     <span className="sources">
       {sources.map((source) => (
-        <span key={source} className="source">{source}</span>
+        <a key={source.name} className="source" href={source.url} target="_blank" rel="noopener noreferrer">
+          {source.name}
+        </a>
       ))}
     </span>
   );

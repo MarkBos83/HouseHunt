@@ -11,6 +11,7 @@ import househunt.merge.mergeListings
 import househunt.model.BikeInfo
 import househunt.model.MergedHome
 import househunt.model.PublishedHome
+import househunt.model.PublishedSource
 import househunt.store.Database
 import househunt.store.HomeEntry
 import househunt.store.StoredHome
@@ -77,9 +78,9 @@ class PublishedHomeBuilder(
         return updated
     }
 
-    /** The merged listings are already sorted by source priority. */
-    private fun listSources(merged: MergedHome): List<String> =
-        merged.listings.map { it.source.name }.distinct()
+    /** The merged listings are already sorted by source priority; one link per site. */
+    private fun listSources(merged: MergedHome): List<PublishedSource> =
+        merged.listings.distinctBy { it.source }.map { PublishedSource(it.source.name, it.url) }
 
     private fun toPublishedHome(stored: StoredHome, merged: MergedHome, work: BikeInfo?, station: BikeInfo?) = PublishedHome(
         key = "h${stored.id}",
